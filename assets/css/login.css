@@ -1,0 +1,77 @@
+   * { box-sizing: border-box; }
+    body {
+      font-family: 'Spline Sans', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)),
+                  url('./img/cover1.jpg') center/cover no-repeat;
+    }
+    .auth-card {
+      background: #fff;
+      border-radius: 0;
+      padding: 48px 40px;
+      width: 100%;
+      max-width: 440px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    .auth-card .brand-logo {
+      max-width: 130px;
+      display: block;
+      margin: 0 auto 28px;
+    }
+    .auth-card h2 {
+      font-weight: 700;
+      font-size: 1.6rem;
+      color: #222;
+      text-align: center;
+      margin-bottom: 4px;
+    }
+    .auth-card .subtitle {
+      color: #777;
+      text-align: center;
+      font-size: 0.9rem;
+      margin-bottom: 28px;
+    }
+    .form-control {
+      border-radius: 0;
+      height: 50px;
+      border: 1px solid #ddd;
+      font-family: 'Spline Sans', sans-serif;
+      transition: border-color .3s, box-shadow .3s;
+    }
+    .form-control:focus {
+      border-color: #d43076;
+      box-shadow: 0 0 0 3px rgba(212,48,118,.12);
+      outline: none;
+    }
+    .input-group-text {
+      border-radius: 0;
+      background: #f8f8f8;
+      border: 1px solid #ddd;
+      color: #999;
+    }
+    .btn-brand {
+      background-color: #d43076;
+      border-color: #d43076;
+      color: #fff;
+      font-weight: 600;
+      border-radius: 0;
+      padding: 14px;
+      width: 100%;
+      font-family: 'Spline Sans', sans-serif;
+      font-size: 1rem;
+      transition: background .4s, border-color .4s;
+    }
+    .btn-brand:hover {
+         background-color: #b8265f; border-color: #b8265f; color: #fff; 
+    }
+    .divider { display: flex; align-items: center; gap: 12px; margin: 22px 0; color: #bbb; font-size: .85rem; }
+    .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: #e8e8e8; }
+    .auth-link { color: #d43076; font-weight: 600; text-decoration: none; }
+    .auth-link:hover { color: #b8265f; }
+    .alert-auth { border-radius: 0; font-size: .88rem; display: none; }
+    .toggle-pass { cursor: pointer; }
+    label { font-size: .9rem; font-weight: 500; color: #444; margin-bottom: 6px; }
+    .form-check-input:checked { background-color: #d43076; border-color: #d43076; }
