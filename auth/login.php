@@ -1,3 +1,7 @@
+<?php
+session_start();
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -19,12 +23,14 @@
     <div class="alert alert-danger alert-auth" id="loginError" role="alert">
       <i class="fa-solid fa-circle-exclamation me-2"></i><span id="loginErrorMsg"></span>
     </div>
+    <?php include "../errors/error.php"; ?>
+    <form action="handle_login.php" method="POST"> 
 
     <div class="mb-3">
       <label for="loginEmail">Email Address</label>
       <div class="input-group">
         <span class="input-group-text"><i class="fa-regular fa-envelope"></i></span>
-        <input type="email" id="loginEmail" class="form-control" placeholder="you@example.com" autocomplete="email">
+        <input type="email" id="loginEmail" name="Email" class="form-control" placeholder="you@example.com" autocomplete="email" required >
       </div>
     </div>
 
@@ -32,15 +38,17 @@
       <label for="loginPassword">Password</label>
       <div class="input-group">
         <span class="input-group-text"><i class="fa-solid fa-lock"></i></span>
-        <input type="password" id="loginPassword" class="form-control" placeholder="Enter your password">
+        <input type="password" id="loginPassword" name="Password" class="form-control" placeholder="Enter your password" required>
         <span class="input-group-text toggle-pass">
           <i class="fa-regular fa-eye"></i>
         </span>
       </div>
     </div>
-    <button class="btn btn-brand">
+    <button class="btn btn-brand" type="submit" name="submit">
       <i class="fa-solid fa-right-to-bracket me-2"></i>Sign In
+
     </button>
+    </form>
 
     <div class="divider">or</div>
 
