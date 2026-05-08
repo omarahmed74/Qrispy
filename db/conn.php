@@ -1,7 +1,9 @@
 <?php
 
-$conn = mysqli_connect("localhost", "root", "", "restaurant_db");
 
-if (!$conn) {
-    die("Connection failed: " . mysqli_connect_error());
+// connect to database with PDO
+try {
+    $pdo = new PDO('mysql:host=localhost;dbname=restaurant_db', 'root', '');
+} catch (PDOException $e) {
+    die("Database connection failed: " . $e->getMessage());
 }
