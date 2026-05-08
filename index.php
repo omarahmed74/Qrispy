@@ -1,3 +1,8 @@
+<?php
+session_start();
+include "./includes/function.php";
+require_login();
+?>
 <!DOCTYPE html>
 <html lang="eng"> 
 
@@ -47,12 +52,21 @@
             </ul>
 
             <div class="d-flex align-items-center gap-2">
-              <a href="./auth/login.php" class="btn btn-outline-dark btn-sm px-3" style="border-radius:0; font-weight:600; border-width:2px;">
-                <i class="fa-regular fa-user me-1"></i>Login
-              </a>
-              <a href="./auth/register.php" class="btn btn-brand btn-sm px-3">
-                <i class="fa-solid fa-user-plus me-1"></i>Register
-              </a>
+              <?php if (isset($_SESSION['user_id'])): ?>
+                <span class="fw-bold">
+                    Welcome, <?php echo $_SESSION['user_name']; ?>
+                </span>
+                <a href="./auth/logout.php" class="btn btn-outline-dark btn-sm px-3" style="border-radius:0; font-weight:600; border-width:2px;">
+                  <i class="fa-regular fa-user me-1"></i>Logout
+                </a>
+              <?php else: ?>
+                <a href="./auth/login.php" class="btn btn-outline-dark btn-sm px-3" style="border-radius:0; font-weight:600; border-width:2px;">
+                  <i class="fa-regular fa-user me-1"></i>Login
+                </a>
+                <a href="./auth/register.php" class="btn btn-brand btn-sm px-3">
+                  <i class="fa-solid fa-user-plus me-1"></i>Register
+                </a>
+              <?php endif; ?>
             </div>
           </div>
         </div>
