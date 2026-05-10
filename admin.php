@@ -1,0 +1,385 @@
+<?php 
+session_start();
+include "./db/conn.php";
+include "./includes/function.php"; 
+
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
+    redirect("./auth/login.php");
+    exit();
+}
+// 2. UPDATE FUNCTIONALITY
+if (isset($_GET['action']) && $_GET['action'] == 'complete' && isset($_GET['id'])) {
+    $stmt = $pdo->prepare("UPDATE orders SET status = 'Completed' WHERE id = ?");
+    $stmt->execute([$_GET['id']]);
+    redirect("admin.php");
+}
+
+// 3. DELETE FUNCTIONALITY
+if (isset($_GET['action']) && $_GET['action'] == 'delete' && isset($_GET['id'])) {
+    $stmt = $pdo->prepare("DELETE FROM orders WHERE id = ?");
+    $stmt->execute([$_GET['id']]);
+    redirect("admin.php");
+}
+
+
+// Fetch all orders using a LEFT OUTER JOIN to get user and menu item details
+$query = "
+    SELECT orders.id, orders.name AS order_name, orders.status, orders.price, users.name AS customer_name, menu.item_name 
+    FROM orders 
+    LEFT OUTER JOIN users ON orders.user_id = users.id 
+    LEFT OUTER JOIN menu ON orders.item_id = menu.item_id
+    ORDER BY orders.created_at DESC
+";
+$stmt = $pdo->query($query);
+$all_orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+?>
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Qrispy – Admin Dashboard</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="./assets/css/admin.css">
+  <link href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <img src="./assets/img/Qrispy_white.svg" alt="Qrispy">
+    <span class="badge-admin">Admin</span>
+  </div>
+  <nav>
+    <div class="nav-section-title">Main</div>
+    <a href="#" class="nav-link active">
+      <i class="fa-solid fa-gauge"></i> Dashboard
+    </a>
+    <a href="#" class="nav-link">
+      <i class="fa-solid fa-calendar-check"></i> Orders
+    </a>
+    <a href="#" class="nav-link">
+      <i class="fa-solid fa-utensils"></i> Menu Items
+    </a>
+    <div class="nav-section-title">Management</div>
+    <a href="#" class="nav-link">
+      <i class="fa-solid fa-users"></i> Users
+    </a>
+    <a href="#" class="nav-link">
+      <i class="fa-regular fa-envelope"></i> Messages
+      <span class="badge ms-auto" style="background:#d43076;font-size:.7rem" id="msgBadge">3</span>
+    </a>
+    <div class="nav-section-title">System</div>
+    <a href="#" class="nav-link">
+      <i class="fa-solid fa-gear"></i> Settings
+    </a>
+    <a href="index.html" class="nav-link">
+      <i class="fa-solid fa-arrow-left"></i> Back to Site
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-info">
+      <div class="avatar" id="adminAvatar">A</div>
+      <div>
+        <div class="user-name" id="adminName">Admin</div>
+        <div class="user-role">Administrator</div>
+      </div>
+    </div>
+  </div>
+</aside>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+
+<div class="main-content">
+  <div class="topbar">
+    <div class="d-flex align-items-center gap-3">
+      <button class="sidebar-toggle"><i class="fa-solid fa-bars"></i></button>
+      <h5 id="pageTitle">Dashboard</h5>
+    </div>
+    <div class="topbar-right">
+      <button class="icon-btn">
+        <i class="fa-regular fa-bell"></i>
+        <span class="notif-dot"></span>
+      </button>
+      <a href="./login.html" class="icon-btn" title="Logout" style="text-decoration: none;">
+        <i class="fa-solid fa-right-from-bracket"></i>
+      </a>
+    </div>
+  </div>
+
+  <div class="page-body">
+
+    <!-- ══ DASHBOARD ══ -->
+    <div id="section-dashboard">
+      <div class="row g-4 mb-4">
+        <div class="col-xl-3 col-sm-6">
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#fce7f3"><i class="fa-solid fa-calendar-check" style="color:#d43076"></i></div>
+            <div>
+              <div class="stat-label">Orders</div>
+              <div class="stat-value">0</div>
+              <div class="stat-change up"><i class="fa-solid fa-arrow-up"></i> Today</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-xl-3 col-sm-6">
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#e0e7ff"><i class="fa-solid fa-users" style="color:#4f46e5"></i></div>
+            <div>
+              <div class="stat-label">Ordered Users</div>
+              <div class="stat-value" id="statUsers">0</div>
+              <div class="stat-change up"><i class="fa-solid fa-arrow-up"></i> Total</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-xl-3 col-sm-6">
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#d1fae5"><i class="fa-regular fa-envelope" style="color:#059669"></i></div>
+            <div>
+              <div class="stat-label">Messages</div>
+              <div class="stat-value" id="statMessages">0</div>
+              <div class="stat-change up"><i class="fa-solid fa-arrow-up"></i> Unread</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-xl-3 col-sm-6">
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#fef3c7"><i class="fa-solid fa-utensils" style="color:#d97706"></i></div>
+            <div>
+              <div class="stat-label">Menu Items</div>
+              <div class="stat-value" id="statMenu">0</div>
+              <div class="stat-change up"><i class="fa-solid fa-arrow-up"></i> Active</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Reservations Table -->
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          Recent Orders
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table mb-0">
+              <thead>
+                <tr>
+                  <th>Order ID</th>
+                  <th>Customer</th>
+                  <th>Item</th>
+                  <th>Total</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <?php if (count($all_orders) > 0): ?>
+                    <?php foreach ($all_orders as $order): ?>
+                    <tr>
+                        <td><?= clean($order['order_name']) ?></td>
+                        <td><?= clean($order['customer_name'] ?? 'Unknown User') ?></td>
+                        <td><?= clean($order['item_name'] ?? 'Deleted Item') ?></td>
+                        <td>$<?= clean($order['price']) ?></td>
+                        <td>
+                            <span class="badge" style="background-color: <?= $order['status'] == 'pending' ? '#f59e0b' : '#10b981' ?>;">
+                                <?= clean($order['status']) ?>
+                            </span>
+                        </td>
+                        <td>
+                            <?php if ($order['status'] == 'pending'): ?>
+                                <a href="admin.php?action=complete&id=<?= $order['id'] ?>" class="btn btn-sm btn-success" title="Mark Completed"><i class="fa-solid fa-check"></i></a>
+                            <?php endif; ?>
+                            <a href="admin.php?action=delete&id=<?= $order['id'] ?>" class="btn btn-sm btn-outline-danger" title="Delete Order" onclick="return confirm('Are you sure you want to delete this order?');"><i class="fa-solid fa-trash"></i></a>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <tr><td colspan="6" class="text-center text-muted py-4">No orders yet.</td></tr>
+                <?php endif; ?>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+   
+    <div id="section-reservations" style="display:none">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <span class="text-muted" style="font-size:.9rem">Manage all table bookings</span>
+        <button class="btn btn-brand btn-sm"><i class="fa-solid fa-plus me-1"></i>Add Order</button>
+      </div>
+      <div class="card">
+        <div class="card-header">All Orders</div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table mb-0">
+              <thead>
+                <tr><th>#</th><th>Name</th><th>Email</th><th>Phone</th><th>Date</th><th>Time</th><th>Guests</th><th>Status</th><th>Actions</th></tr>
+              </thead>
+              <tbody id="reservationsTable">
+                <tr><td colspan="9" class="text-center text-muted py-4">No Orders yet.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ MENU ITEMS ══ -->
+    <div id="section-menu" style="display:none">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <span class="text-muted" style="font-size:.9rem">Manage your restaurant menu</span>
+        <button class="btn btn-brand btn-sm"><i class="fa-solid fa-plus me-1"></i>Add Item</button>
+      </div>
+      <div class="card">
+        <div class="card-header">Menu Items</div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table mb-0">
+              <thead>
+                <tr><th>#</th><th>Name</th><th>Category</th><th>Rating</th><th>Actions</th></tr>
+              </thead>
+              <tbody id="menuTable">
+                <tr><td colspan="5" class="text-center text-muted py-4">No menu items yet.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ USERS ══ -->
+    <div id="section-users" style="display:none">
+      <div class="mb-4 text-muted" style="font-size:.9rem">All ordered users</div>
+      <div class="card">
+        <div class="card-header">ordered Users</div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table mb-0">
+              <thead>
+                <tr><th>#</th><th>Name</th><th>Email</th><th>Phone</th><th>Role</th><th>Joined</th><th>Actions</th></tr>
+              </thead>
+              <tbody id="usersTable">
+                <tr><td colspan="7" class="text-center text-muted py-4">No users ordered yet.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ MESSAGES ══ -->
+    <div id="section-messages" style="display:none">
+      <div class="mb-4 text-muted" style="font-size:.9rem">Messages from the order / contact form</div>
+      <div class="card">
+        <div class="card-header">Messages</div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table mb-0">
+              <thead>
+                <tr><th>#</th><th>Name</th><th>Email</th><th>Message</th><th>Date</th><th>Actions</th></tr>
+              </thead>
+              <tbody id="messagesTable">
+                <tr><td colspan="6" class="text-center text-muted py-4">No messages yet.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SETTINGS ══ -->
+    <div id="section-settings" style="display:none">
+      <div class="row justify-content-center">
+        <div class="col-lg-6">
+          <div class="card">
+            <div class="card-header">Admin Settings</div>
+            <div class="card-body p-4">
+              <div class="mb-3">
+                <label class="form-label">Admin Name</label>
+                <input type="text" class="form-control" id="settingsName" placeholder="Your name">
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Email</label>
+                <input type="email" class="form-control" id="settingsEmail" placeholder="admin@qrispy.com">
+              </div>
+              <div class="mb-3">
+                <label class="form-label">New Password</label>
+                <input type="password" class="form-control" id="settingsPassword" placeholder="Leave blank to keep current">
+              </div>
+              <button class="btn btn-brand"><i class="fa-solid fa-floppy-disk me-2"></i>Save Changes</button>
+              <div class="alert alert-success mt-3" id="settingsSaved" style="display:none;border-radius:0">Settings saved!</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /page-body -->
+</div>
+
+
+<div class="modal fade" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title fw-700">Add Order</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body">
+        <div class="row g-3">
+          <div class="col-6"><label class="form-label">Full Name</label><input class="form-control" id="mName" placeholder="John Doe"></div>
+          <div class="col-6"><label class="form-label">Email</label><input class="form-control" id="mEmail" placeholder="john@example.com"></div>
+          <div class="col-6"><label class="form-label">Phone</label><input class="form-control" id="mPhone" placeholder="+1 000 000"></div>
+          <div class="col-6"><label class="form-label">Guests</label><input class="form-control" type="number" id="mGuests" min="1" value="2"></div>
+          <div class="col-6"><label class="form-label">Date</label><input class="form-control" type="date" id="mDate"></div>
+          <div class="col-6"><label class="form-label">Time</label><input class="form-control" type="time" id="mTime"></div>
+          <div class="col-12"><label class="form-label">Status</label>
+            <select class="form-control" id="mStatus">
+              <option value="Confirmed">Confirmed</option>
+              <option value="Pending">Pending</option>
+              <option value="Cancelled">Cancelled</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+        <button class="btn btn-brand btn-sm">Save Order</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal fade" id="addMenuModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title fw-700">Add Menu Item</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body">
+        <div class="row g-3">
+          <div class="col-12"><label class="form-label">Item Name</label><input class="form-control" id="miName" placeholder="e.g. Greek Salad"></div>
+          <div class="col-6">
+            <label class="form-label">Category</label>
+            <select class="form-control" id="miCategory">
+              <option>Breakfast</option><option>Lunch</option><option>Dinner</option><option>Dessert</option><option>Drinks</option>
+            </select>
+          </div>
+          <div class="col-6"><label class="form-label">Rating (1-5)</label><input class="form-control" type="number" id="miRating" min="1" max="5" step="0.5" value="4.0"></div>
+          <div class="col-12"><label class="form-label">Description</label><textarea class="form-control" id="miDesc" rows="2" placeholder="Short description..."></textarea></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+        <button class="btn btn-brand btn-sm">Save Item</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

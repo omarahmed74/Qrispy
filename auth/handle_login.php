@@ -26,7 +26,15 @@ if (isset($_POST['submit'])) {
         // Login successful
         $_SESSION['user_id'] = $user['id'];
         $_SESSION['user_name'] = $user['name'];
-        redirect("../index.php");
+        $_SESSION['role'] = $user['role'];
+        
+        // Redirect based on role
+        if ($user['role'] === 'admin') {
+            redirect("../admin.php");
+        } else {
+            redirect("../index.php");
+        }
+
         exit();
 
     } else {
