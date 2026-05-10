@@ -1,43 +1,30 @@
 <?php 
 session_start();
-include "./db/conn.php";
-include "./includes/function.php"; 
+include "../db/conn.php";
+include "../includes/function.php"; 
+
 
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
-    redirect("./auth/login.php");
+    redirect("../auth/login.php");
     exit();
 }
-// 2. UPDATE FUNCTIONALITY
-if (isset($_GET['action']) && $_GET['action'] == 'complete' && isset($_GET['id'])) {
-    $stmt = $pdo->prepare("UPDATE orders SET status = 'Completed' WHERE id = ?");
-    $stmt->execute([$_GET['id']]);
-    redirect("admin.php");
-}
-
-// 3. DELETE FUNCTIONALITY
-if (isset($_GET['action']) && $_GET['action'] == 'delete' && isset($_GET['id'])) {
-    $stmt = $pdo->prepare("DELETE FROM orders WHERE id = ?");
-    $stmt->execute([$_GET['id']]);
-    redirect("admin.php");
-}
-
 
 // Fetch all orders using a LEFT OUTER JOIN to get user and menu item details
-$query = "
-    SELECT orders.id, orders.name AS order_name, orders.status, orders.price, users.name AS customer_name, menu.item_name 
-    FROM orders 
-    LEFT OUTER JOIN users ON orders.user_id = users.id 
-    LEFT OUTER JOIN menu ON orders.item_id = menu.item_id
-    ORDER BY orders.created_at DESC
-";
+$query = "SELECT orders.id, orders.name AS order_name, orders.status, orders.price, users.name AS customer_name, menu.item_name FROM orders LEFT OUTER JOIN users ON orders.user_id = users.id LEFT OUTER JOIN menu ON orders.item_id = menu.item_id ORDER BY orders.created_at DESC";
 $stmt = $pdo->query($query);
 $all_orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+
+// Get total counts for dashboard stats
+$totalOrders = count($all_orders);
+$queryUsers = "SELECT COUNT(DISTINCT user_id) FROM orders";
+$stmtUsers = $pdo->query($queryUsers);
+$totalUsers = $stmtUsers->fetchColumn();
+$queryMenu = "SELECT COUNT(*) FROM menu";
+$stmtMenu = $pdo->query($queryMenu);
+$totalMenu = $stmtMenu->fetchColumn();
+
 ?>
-
-
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -46,14 +33,14 @@ $all_orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
   <title>Qrispy – Admin Dashboard</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="./assets/css/admin.css">
+  <link rel="stylesheet" href="../assets/css/admin.css">
   <link href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
 <aside class="sidebar" id="sidebar">
   <div class="sidebar-logo">
-    <img src="./assets/img/Qrispy_white.svg" alt="Qrispy">
+    <img src="../assets/img/Qrispy_white.svg" alt="Qrispy">
     <span class="badge-admin">Admin</span>
   </div>
   <nav>
@@ -61,25 +48,21 @@ $all_orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <a href="#" class="nav-link active">
       <i class="fa-solid fa-gauge"></i> Dashboard
     </a>
-    <a href="#" class="nav-link">
+    <a   href="#" class="nav-link">
       <i class="fa-solid fa-calendar-check"></i> Orders
     </a>
-    <a href="#" class="nav-link">
+    <a href="../menu/index.php" class="nav-link">
       <i class="fa-solid fa-utensils"></i> Menu Items
     </a>
     <div class="nav-section-title">Management</div>
     <a href="#" class="nav-link">
       <i class="fa-solid fa-users"></i> Users
     </a>
-    <a href="#" class="nav-link">
-      <i class="fa-regular fa-envelope"></i> Messages
-      <span class="badge ms-auto" style="background:#d43076;font-size:.7rem" id="msgBadge">3</span>
-    </a>
     <div class="nav-section-title">System</div>
     <a href="#" class="nav-link">
       <i class="fa-solid fa-gear"></i> Settings
     </a>
-    <a href="index.html" class="nav-link">
+    <a href="../index.php" class="nav-link">
       <i class="fa-solid fa-arrow-left"></i> Back to Site
     </a>
   </nav>
@@ -107,7 +90,7 @@ $all_orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <i class="fa-regular fa-bell"></i>
         <span class="notif-dot"></span>
       </button>
-      <a href="./login.html" class="icon-btn" title="Logout" style="text-decoration: none;">
+      <a href="../auth/login.php" class="icon-btn" title="Logout" style="text-decoration: none;">
         <i class="fa-solid fa-right-from-bracket"></i>
       </a>
     </div>
@@ -123,7 +106,7 @@ $all_orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <div class="stat-icon" style="background:#fce7f3"><i class="fa-solid fa-calendar-check" style="color:#d43076"></i></div>
             <div>
               <div class="stat-label">Orders</div>
-              <div class="stat-value">0</div>
+              <div class="stat-value"><?php echo $totalOrders; ?></div>
               <div class="stat-change up"><i class="fa-solid fa-arrow-up"></i> Today</div>
             </div>
           </div>
@@ -133,27 +116,18 @@ $all_orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <div class="stat-icon" style="background:#e0e7ff"><i class="fa-solid fa-users" style="color:#4f46e5"></i></div>
             <div>
               <div class="stat-label">Ordered Users</div>
-              <div class="stat-value" id="statUsers">0</div>
+              <div class="stat-value" id="statUsers"><?php echo $totalUsers; ?></div>
               <div class="stat-change up"><i class="fa-solid fa-arrow-up"></i> Total</div>
             </div>
           </div>
         </div>
-        <div class="col-xl-3 col-sm-6">
-          <div class="stat-card">
-            <div class="stat-icon" style="background:#d1fae5"><i class="fa-regular fa-envelope" style="color:#059669"></i></div>
-            <div>
-              <div class="stat-label">Messages</div>
-              <div class="stat-value" id="statMessages">0</div>
-              <div class="stat-change up"><i class="fa-solid fa-arrow-up"></i> Unread</div>
-            </div>
-          </div>
-        </div>
+
         <div class="col-xl-3 col-sm-6">
           <div class="stat-card">
             <div class="stat-icon" style="background:#fef3c7"><i class="fa-solid fa-utensils" style="color:#d97706"></i></div>
             <div>
               <div class="stat-label">Menu Items</div>
-              <div class="stat-value" id="statMenu">0</div>
+              <div class="stat-value" id="statMenu"><?php echo $totalMenu; ?></div>
               <div class="stat-change up"><i class="fa-solid fa-arrow-up"></i> Active</div>
             </div>
           </div>
@@ -193,9 +167,9 @@ $all_orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         </td>
                         <td>
                             <?php if ($order['status'] == 'pending'): ?>
-                                <a href="admin.php?action=complete&id=<?= $order['id'] ?>" class="btn btn-sm btn-success" title="Mark Completed"><i class="fa-solid fa-check"></i></a>
+                                <a href="update.php?action=complete&id=<?= $order['id'] ?>" class="btn btn-sm btn-success" title="Mark Completed"><i class="fa-solid fa-check"></i></a>
                             <?php endif; ?>
-                            <a href="admin.php?action=delete&id=<?= $order['id'] ?>" class="btn btn-sm btn-outline-danger" title="Delete Order" onclick="return confirm('Are you sure you want to delete this order?');"><i class="fa-solid fa-trash"></i></a>
+                            <a href="delete.php?action=delete&id=<?= $order['id'] ?>" class="btn btn-sm btn-outline-danger" title="Delete Order" onclick="return confirm('Are you sure you want to delete this order?');"><i class="fa-solid fa-trash"></i></a>
                         </td>
                     </tr>
                     <?php endforeach; ?>
@@ -208,7 +182,6 @@ $all_orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </div>
       </div>
 
-   
     <div id="section-reservations" style="display:none">
       <div class="d-flex justify-content-between align-items-center mb-4">
         <span class="text-muted" style="font-size:.9rem">Manage all table bookings</span>
@@ -324,7 +297,6 @@ $all_orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
   </div><!-- /page-body -->
 </div>
 
-
 <div class="modal fade" tabindex="-1">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -379,7 +351,6 @@ $all_orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
     </div>
   </div>
 </div>
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

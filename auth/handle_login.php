@@ -30,7 +30,7 @@ if (isset($_POST['submit'])) {
         
         // Redirect based on role
         if ($user['role'] === 'admin') {
-            redirect("../admin.php");
+            redirect("../admin/admin.php");
         } else {
             redirect("../index.php");
         }
