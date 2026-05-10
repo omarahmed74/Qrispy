@@ -43,9 +43,6 @@ $menus = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <a class="nav-link" href="../index.php#team">Team</a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="../index.php#order">Order</a>
-              </li>
-              <li class="nav-item">
                 <a class="nav-link" href="../index.php#blog">Blog</a>
               </li>
             </ul>

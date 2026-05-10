@@ -5,7 +5,6 @@ require_login();
 ?>
 <!DOCTYPE html>
 <html lang="eng"> 
-
 <head> 
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -43,13 +42,9 @@ require_login();
                 <a class="nav-link" href="#team">Team</a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="#order">Order</a>
-              </li>
-              <li class="nav-item">
                 <a class="nav-link" href="#blog">Blog</a>
               </li>
             </ul>
-
             <div class="d-flex align-items-center gap-2">
               <?php if (isset($_SESSION['user_id'])): ?>
                 <span class="fw-bold">
@@ -67,6 +62,9 @@ require_login();
                 </a>
               <?php endif; ?>
             </div>
+            <a href="./auth/pro.php" class="btn btn-brand btn-sm px-3 ms-3">
+                  <i class="fa-solid fa-user-plus me-1"></i>Pro
+                </a>
           </div>
         </div>
       </nav>
@@ -190,7 +188,7 @@ require_login();
             <div class="team-member p-4 py-5 border shadow-on text-center">
             <img src="./assets/img/team_01.png" alt="">
             <div class="team-member-content">
-                <h4 class="mb-0 mt-4">Feras</h4>
+                <h4 class="mb-0 mt-4">Seif</h4>
                 <p class="mb-0">Main Chef</p>
             </div>
             </div>
@@ -199,7 +197,7 @@ require_login();
             <div class="team-member p-4 py-5 border shadow-on text-center">
             <img src="./assets/img/team_03.png" alt="">
             <div class="team-member-content">
-                <h4 class="mb-0 mt-4">Mostafa</h4>
+                <h4 class="mb-0 mt-4">Youssef</h4>
                 <p class="mb-0">Senior Chef</p>
             </div>
             </div>
@@ -217,7 +215,7 @@ require_login();
             <div class="team-member p-4 py-5 border shadow-on text-center">
             <img src="./assets/img/team_01.png" alt="">
             <div class="team-member-content">
-                <h4 class="mb-0 mt-4">Mohamed</h4>
+                <h4 class="mb-0 mt-4">Yassin</h4>
                 <p class="mb-0">sauce Chef</p>
             </div>
             </div>
@@ -425,10 +423,10 @@ require_login();
                 <img src="./assets/img/Qrispy_white.svg" class="mb-4" alt="">
                 <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Reprehenderit architecto unde magnam.</p>
                 <div class="social-links">
-                <a href="https://www.facebook.com/omar.khalaf.5851"><i class="fa-brands fa-facebook"></i></a>
-                <a href="https://www.instagram.com/omar_ahmed12x/"><i class="fa-brands fa-instagram"></i></a>
-                <a href="https://www.instagram.com/ferasihab.10/"><i class="fa-brands fa-twitter"></i></a>
-                <a href="https://www.tiktok.com/@omar__0290"><i class="fa-brands fa-tiktok"></i></a>
+                <a href="#"><i class="fa-brands fa-facebook"></i></a>
+                <a href="#"><i class="fa-brands fa-instagram"></i></a>
+                <a href="#"><i class="fa-brands fa-twitter"></i></a>
+                <a href="#"><i class="fa-brands fa-tiktok"></i></a>
                 </div>
             </div>
             <div class="col-lg-3 ms-auto">
@@ -461,8 +459,6 @@ require_login();
         </div>
     </div>
     </footer>
-
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
