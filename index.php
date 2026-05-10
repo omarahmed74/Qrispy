@@ -62,9 +62,18 @@ require_login();
                 </a>
               <?php endif; ?>
             </div>
-            <a href="./auth/pro.php" class="btn btn-brand btn-sm px-3 ms-3">
-                  <i class="fa-solid fa-user-plus me-1"></i>Pro
+            <?php if (!isset($_SESSION['is_elite']) || $_SESSION['is_elite'] != 1): ?>
+                <a href="./auth/pro.php" class="btn btn-brand btn-sm px-3 ms-3">
+                    <i class="fa-solid fa-user-plus me-1"></i>Pro
                 </a>
+            <?php endif; ?>
+            <?php if (isset($_SESSION['is_elite']) && $_SESSION['is_elite'] == 1): ?>
+                <div class="header-container btn btn-brand btn-sm px-3 ms-3">
+                    <div class="pro-badge">
+                        ⭐ Pro
+                    </div>
+                </div>
+            <?php endif; ?>
           </div>
         </div>
       </nav>

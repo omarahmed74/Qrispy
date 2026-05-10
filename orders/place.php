@@ -23,12 +23,25 @@ $order_name  = 'order' . ($order_count + 1);
 $ids = implode(',', array_map('intval', $items));
 $ordered_items = $pdo->query("SELECT * FROM menu WHERE item_id IN ($ids)")->fetchAll(PDO::FETCH_ASSOC);
 
-// Insert each item
+
+// 1. Calculate the initial total
 $total = 0;
 foreach ($ordered_items as $item) {
     $total += $item['price'];
+}
+// 2. Apply the Elite Discount if applicable
+$discount = 0;
+if (isset($_SESSION['is_elite']) && $_SESSION['is_elite'] == 1) {
+    $discount = $total * 0.10; // 10% discount
+    $total = $total - $discount;
+}
+// 3. Now insert each item into the database with the adjusted price if needed
+// (Or keep the original price in 'orders' and just show the discount on the UI)
+foreach ($ordered_items as $item) {
     $stmt = $pdo->prepare("INSERT INTO orders (name, price, status, quantity, user_id, item_id) VALUES (?, ?, ?, ?, ?, ?)");
-    $stmt->execute([$order_name, $item['price'], 'pending', 1, $user_id, $item['item_id']]);
+    // If you want the database to save the discounted price per item:
+    $item_price = ($_SESSION['is_elite'] == 1) ? ($item['price'] * 0.9) : $item['price'];
+    $stmt->execute([$order_name, $item_price, 'pending', 1, $user_id, $item['item_id']]);
 }
 ?>
 <!DOCTYPE html>
@@ -52,7 +65,6 @@ foreach ($ordered_items as $item) {
                 <ul class="navbar-nav mx-auto">
                     <li class="nav-item"><a class="nav-link" href="../index.php">Home</a></li>
                     <li class="nav-item"><a class="nav-link" href="../index.php#menu">Menu</a></li>
-                    <li class="nav-item"><a class="nav-link" href="../index.php#order">Order</a></li>
                 </ul>
             </div>
         </div>
@@ -68,7 +80,6 @@ foreach ($ordered_items as $item) {
                     <p class="text-muted"><?php echo count($ordered_items); ?> item(s)</p>
                 </div>
             </div>
-
             <div class="row gy-4 justify-content-center">
                 <?php foreach ($ordered_items as $item): ?>
                 <div class="col-lg-3 col-sm-6">
@@ -83,7 +94,6 @@ foreach ($ordered_items as $item) {
                 </div>
                 <?php endforeach; ?>
             </div>
-
             <div class="row mt-5">
                 <div class="col-12 text-center">
                     <h4>Order Total: <span style="color:#d43076;">$<?php echo $total;?></span></h4>

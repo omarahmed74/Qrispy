@@ -37,7 +37,6 @@ $totalMenu = $stmtMenu->fetchColumn();
   <link href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-
 <aside class="sidebar" id="sidebar">
   <div class="sidebar-logo">
     <img src="../assets/img/Qrispy_white.svg" alt="Qrispy">
@@ -47,9 +46,6 @@ $totalMenu = $stmtMenu->fetchColumn();
     <div class="nav-section-title">Main</div>
     <a href="#" class="nav-link active">
       <i class="fa-solid fa-gauge"></i> Dashboard
-    </a>
-    <a   href="#" class="nav-link">
-      <i class="fa-solid fa-calendar-check"></i> Orders
     </a>
     <a href="../menu/index.php" class="nav-link">
       <i class="fa-solid fa-utensils"></i> Menu Items

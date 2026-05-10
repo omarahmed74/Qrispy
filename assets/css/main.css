@@ -6,11 +6,9 @@ body {
     line-height: 1.7;
     overflow-x: hidden;
 }
-
 h1,h2,h3,h4,h6 {
   color: #222;
 }
-
 a{
     color: #222;
     text-decoration: none;
@@ -57,9 +55,6 @@ section {
 }
 
 
-
-
-
 .slide-1{
     background:  linear-gradient(rgba(0, 0, 0, 0.5) , rgba(0, 0, 0, 0.5)  ), url('../img/cover1.jpg');
 }
@@ -99,10 +94,6 @@ section {
     vertical-align: middle;
 }
 
-
-
-
-
 #about  h1::after{
     content: "";
     width: 60px;
@@ -113,10 +104,6 @@ section {
     
 }
 
-
-
-
-
 .intro-text{
   margin-bottom: 40px;
   text-align: center;
@@ -126,9 +113,6 @@ section {
     max-width: 500px;
     margin: 16px auto 0 auto;
 }
-
-
-
 
 #menu .nav-pills .nav-link {
     background-color: #fff;
@@ -165,10 +149,6 @@ section {
     color: #d43076;
 }
 
-
-
-
-
 #features {
     background:  linear-gradient(rgba(0, 0, 0, 0.5) , rgba(0, 0, 0, 0.5)  ), url('../img/cover2.jpg');
 }
@@ -194,16 +174,11 @@ section {
     background-color: #d43076;
 }
 
-
-
 .team-member img{
    max-width: 140px;
    box-shadow: -10px -10px 0 #d43076;
    border-radius: 100px;
 }
-
-
-
 
 #review {
     background:  linear-gradient(rgba(0, 0, 0, 0.5) , rgba(0, 0, 0, 0.5)  ), url('../img/cover3.jpg');
