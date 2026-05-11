@@ -4,7 +4,7 @@ include "../db/conn.php";
 include "../includes/function.php";
 
 $full_name = $_POST['full_name'];
-$items = $_POST['items'] ?? [];
+$items = $_POST['items'] ?? []; 
 
 if (empty($items)) {
     echo "<p>Please go back and select at least one item.</p>";
@@ -16,11 +16,11 @@ $user_id = $_SESSION['user_id'];
 // Count distinct order names for this user to generate next order name
 $count_stmt = $pdo->prepare("SELECT COUNT(DISTINCT name) FROM orders WHERE user_id = ?");
 $count_stmt->execute([$user_id]);
-$order_count = $count_stmt->fetchColumn();
-$order_name  = 'order' . ($order_count + 1);
+$order_count = $count_stmt->fetchColumn(); 
+$order_name  = 'order' . ($order_count + 1); 
 
-// Fetch menu items
-$ids = implode(',', array_map('intval', $items));
+
+$ids = implode(',', array_map('intval', $items)); 
 $ordered_items = $pdo->query("SELECT * FROM menu WHERE item_id IN ($ids)")->fetchAll(PDO::FETCH_ASSOC);
 
 
@@ -35,12 +35,11 @@ if (isset($_SESSION['is_elite']) && $_SESSION['is_elite'] == 1) {
     $discount = $total * 0.10; // 10% discount
     $total = $total - $discount;
 }
-// 3. Now insert each item into the database with the adjusted price if needed
-// (Or keep the original price in 'orders' and just show the discount on the UI)
+// 3. Now insert 
 foreach ($ordered_items as $item) {
     $stmt = $pdo->prepare("INSERT INTO orders (name, price, status, quantity, user_id, item_id) VALUES (?, ?, ?, ?, ?, ?)");
-    // If you want the database to save the discounted price per item:
-    $item_price = ($_SESSION['is_elite'] == 1) ? ($item['price'] * 0.9) : $item['price'];
+    // Database save with discount 
+   $item_price = (isset($_SESSION['is_elite']) && $_SESSION['is_elite'] == 1) ? ($item['price'] * 0.9): $item['price'];
     $stmt->execute([$order_name, $item_price, 'pending', 1, $user_id, $item['item_id']]);
 }
 ?>

@@ -15,7 +15,7 @@ $stmt = $pdo->query($query);
 $all_orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 
-// Get total counts for dashboard stats
+// Get total counts for dashboard
 $totalOrders = count($all_orders);
 $queryUsers = "SELECT COUNT(DISTINCT user_id) FROM orders";
 $stmtUsers = $pdo->query($queryUsers);

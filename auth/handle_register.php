@@ -36,9 +36,7 @@ if(isset($_POST['submit'])){
         $query = 'SELECT * FROM users WHERE email = :email LIMIT 1';
         $stmt = $pdo->prepare($query);
 
-        $stmt->execute([
-            'email' => $email
-        ]);
+        $stmt->execute(['email' => $email]);
         $result = $stmt->fetchAll();
         if(count($result) > 0){
             $errors[] = "Email already exists";

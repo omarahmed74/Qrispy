@@ -130,11 +130,7 @@ require_login();
         </div>
         </div>
     </div>
-
-
      </section>
-
-
     <section id="features" class="bg-color">
     <div class="container">
         <div class="row ">

@@ -39,7 +39,6 @@ if (isset($_POST['submit'])) {
 
     } else {
         // Login failed
-
         $_SESSION['login_error'] = "Invalid email or password.";
         redirect("login.php");
         exit();
